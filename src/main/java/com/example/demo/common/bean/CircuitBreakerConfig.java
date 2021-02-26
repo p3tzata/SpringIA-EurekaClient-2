@@ -9,7 +9,7 @@ import io.github.resilience4j.common.circuitbreaker.configuration.CircuitBreaker
 import static io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.SlidingWindowType.COUNT_BASED;
 @Configuration
 public class CircuitBreakerConfig {
-
+	/* See in .yml
 	@Bean
     public CircuitBreakerConfigCustomizer someRemoteSvcCircuitBreaker() {
        //https://resilience4j.readme.io/docs/circuitbreaker
@@ -24,5 +24,6 @@ public class CircuitBreakerConfig {
                     builder.slidingWindowType(COUNT_BASED);
                 });
     }
+    */
 	
 }

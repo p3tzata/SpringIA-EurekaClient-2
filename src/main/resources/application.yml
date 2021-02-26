@@ -1,0 +1,52 @@
+#Limit on the number of concurrent requests 
+resilience4j.bulkhead:
+  instances:
+    someRemoteSvc:
+      # Max amount of time a thread should be blocked
+      # when attempting to enter a saturated bulkhead.
+      maxWaitDuration: 10000ms
+      # Max amount of parallel executions allowed by the bulkhead.
+      maxConcurrentCalls: 10
+
+#Retry some more times than call the failBack method. Should be used in idempotent request(GET,DELETE, PUT,) not with POST.
+resilience4j.retry:
+  instances:
+    someRemoteSvc:
+      # The maximum number of retry attempt
+      maxRetryAttempts: 2
+      # Initial interval between retry attempts
+      waitDuration: 1s
+      # Use exponential backoff strategy
+      enableExponentialBackoff: true
+      # Multiplier for the exponential backoff
+      exponentialBackoffMultiplier: 2
+
+#For each period, only N requests can be processed
+resilience4j.ratelimiter:
+  instances:
+    someRemoteSvc:
+      # The number of permissions available during one limit refresh period.
+      limitForPeriod: 3
+      # After each period, the rate limiter sets its permissions count
+      # back to the limitForPeriod value.
+      limitRefreshPeriod: 10s
+      # The default wait time a thread waits for permission.
+      timeoutDuration: 500ms
+     
+# we've set the rate threshold to 15% and a minimum number of 5 call attempts.
+resilience4j.circuitbreaker:
+  instances:
+    someRemoteSvc:
+        ringBufferSizeInClosedState: 5 
+        ringBufferSizeInHalfOpenState: 3
+        failureRateThreshold: 15 
+        eventConsumerBufferSize: 10
+           
+     
+resilience4j.timelimiter:
+    instances:
+      someRemoteSvc:
+        timeout-duration: 1ms
+        cancelRunningFuture: true
+      
+      

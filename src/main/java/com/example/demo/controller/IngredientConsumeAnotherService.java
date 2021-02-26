@@ -13,7 +13,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.demo.domain.Ingredient;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
+import reactor.core.publisher.Mono;
 
 
 
@@ -37,26 +42,63 @@ public class IngredientConsumeAnotherService {
 
 
 
-	//@RateLimiter(name = "someRemoteSvc")
-	////@Bulkhead(name = "someRemoteSvc")
-//	@Retry(name = "someRemoteSvc", fallbackMethod = "getIngredient_fallbackMethod")
-//	@TimeLimiter(name = "someRemoteSvc")
-	@CircuitBreaker(name = "someRemoteSvc", fallbackMethod = "getIngredient_fallbackMethod")
+	//@RateLimiter(name = "someRemoteSvc",fallbackMethod = "getIngredient_fallbackMethod_by_RateLimiter")
+	//@Bulkhead(name = "someRemoteSvc")
+	//@Retry(name = "someRemoteSvc", fallbackMethod = "getIngredient_fallbackMethod_by_Retry")
+	//@CircuitBreaker(name = "someRemoteSvc", fallbackMethod = "getIngredient_fallbackMethod_by_CircuitBreaker")
+	
+	//This TimeLImiter not work at this time. This flag only works when you use TimeLimiter to decorate a method which returns a Future.
+	//@TimeLimiter(name = "someRemoteSvc",fallbackMethod = "getIngredient_fallbackMethod_by_TimeLimiter" )
+	
+	
 	@GetMapping(path = "/{ingredientId}")
 	@ResponseStatus(value = HttpStatus.OK)
-	public Ingredient getIngredient (@PathVariable Long ingredientId) {
+	public Mono<Ingredient> getIngredient (@PathVariable Long ingredientId) {
 		//Ingredient ingredient = restTemplate.getForObject("http://eurekaClient-1/public/ingredient/{id}", Ingredient.class,ingredientId);
 		//Uncoment below to test Hystrix.
-		Ingredient ingredient = restTemplate.getForObject("http://eurekaClient-1/public/ingredient999/{id}", Ingredient.class,ingredientId);
-		return ingredient;
+		//Ingredient ingredient = restTemplate.getForObject("http://eurekaClient-1/public/ingredient/{id}", Ingredient.class,ingredientId);
+		try {
+			Thread.sleep(2 * 1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Ingredient ingredient = new Ingredient(ingredientId,"Some name","Some desc");
+		return Mono.just(ingredient);
 		
 	}
 	
-	public Ingredient getIngredient_fallbackMethod (@PathVariable Long ingredientId,Exception e) {
+	public Mono<Ingredient> getIngredient_fallbackMethod_by_TimeLimiter (@PathVariable Long ingredientId,Exception e) {
 		
-		Ingredient ingredient = new Ingredient(999L, "Default name", "Default_desc");
+		Ingredient ingredient = new Ingredient(999L, "Default name By @TimeLimiter", "Default_desc");
 		
-		return ingredient;
+		return Mono.just(ingredient);
+		
+	}
+	
+	
+	public Mono<Ingredient> getIngredient_fallbackMethod_by_CircuitBreaker (@PathVariable Long ingredientId,Exception e) {
+		
+		Ingredient ingredient = new Ingredient(999L, "Default name By @CircuitBreaker", "Default_desc");
+		
+		return Mono.just(ingredient);
+		
+	}
+	
+	public Mono<Ingredient> getIngredient_fallbackMethod_by_RateLimiter (@PathVariable Long ingredientId,Exception e) {
+		
+		Ingredient ingredient = new Ingredient(999L, "Default name By @RateLimiter", "Default_desc");
+		
+		return Mono.just(ingredient);
+		
+	}
+	
+	
+	public Mono<Ingredient> getIngredient_fallbackMethod_by_Retry (@PathVariable Long ingredientId,Exception e) {
+		
+		Ingredient ingredient = new Ingredient(999L, "Default name By @Retry", "Default_desc");
+		
+		return Mono.just(ingredient);
 		
 	}
 	
